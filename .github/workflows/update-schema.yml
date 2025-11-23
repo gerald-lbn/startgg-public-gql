@@ -1,0 +1,38 @@
+name: Update GraphQL Schema
+
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+  # Once a day at midnight
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  update-schema:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm install graphql --no-save
+
+      - name: Run Generation Script
+        run: node scripts/update-schema.js
+        env:
+          CI: true
+
+      - name: Commit and Push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update schema.graphql from introspection"
+          file_pattern: "schema.graphql"
